@@ -35,6 +35,11 @@ class SentencePieceTokenizer : public Tokenizer {
     return size;
   }
 
+  std::map<std::string, int32_t> GetVocab() final
+  {
+    return std::map<std::string, int32_t>();
+  }
+
   std::string IdToToken(int32_t id) final { return sentence_piece_.IdToPiece(id); }
 
   int32_t TokenToId(const std::string& token) final { return sentence_piece_.PieceToId(token); }

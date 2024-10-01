@@ -90,6 +90,26 @@ class HFTokenizer : public Tokenizer {
     return size;
   }
 
+  std::map<std::string, int32_t> GetVocab() final
+  {
+    const char** keys;
+    unsigned int* values;
+    size_t size;
+    tokenizers_get_vocab(handle_, &keys, &values, &size);
+    assert(size > 0);
+
+    std::map<std::string, int32_t> vocab;
+    for (size_t i = 0; i < size; i++)
+    {
+      vocab[std::string(keys[i])] = values[i];
+    }
+
+    tokenizers_get_vocab_free(keys, values, size);
+
+    return vocab;
+  }
+
+
   std::string IdToToken(int32_t id) final {
     const char* data;
     size_t len;

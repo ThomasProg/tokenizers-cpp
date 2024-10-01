@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace tokenizers {
 
@@ -55,6 +56,8 @@ class Tokenizer {
    * \brief Returns the vocabulary size. Special tokens are considered.
    */
   virtual size_t GetVocabSize() = 0;
+
+  virtual std::map<std::string, int32_t> GetVocab() = 0;
 
   /*!
    * \brief Convert the given id to its corresponding token if it exists. If not, return an

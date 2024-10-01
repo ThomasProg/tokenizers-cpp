@@ -1,6 +1,6 @@
 // A simple C wrapper of tokenzier library
 use serde_json::Value;
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, str::FromStr, ffi::CString, os::raw::c_char};
 use tokenizers::models::bpe::BPE;
 use tokenizers::pre_tokenizers::byte_level::ByteLevel;
 use tokenizers::tokenizer::Tokenizer;
@@ -231,6 +231,66 @@ extern "C" fn tokenizers_free(wrapper: *mut TokenizerWrapper) {
 extern "C" fn tokenizers_get_vocab_size(handle: *mut TokenizerWrapper, size: *mut usize) {
     unsafe {
         *size = (*handle).tokenizer.get_vocab_size(true);
+    }
+}
+
+#[no_mangle]
+extern "C" fn tokenizers_get_vocab(
+    handle: *mut TokenizerWrapper,
+    keys_out: *mut *mut *const c_char,
+    values_out: *mut *mut u32,
+    len_out: *mut usize,
+) {
+    let vocab: HashMap<String, u32>;
+    unsafe {
+        vocab = (*handle).tokenizer.get_vocab(true); 
+    }
+
+    // Get the number of entries in the HashMap
+    let len = vocab.len();
+
+    // Allocate memory for the keys and values
+    let mut keys: Vec<*const c_char> = Vec::with_capacity(len);
+    let mut values: Vec<u32> = Vec::with_capacity(len);
+
+    // Populate the keys and values arrays
+    for (key, value) in vocab {
+        let c_key = CString::new(key.as_str()).unwrap();
+        keys.push(c_key.into_raw()); // Convert Rust String to raw C string
+        values.push(value);
+    }
+
+    // Pass ownership of the vectors to C
+    unsafe {
+        *keys_out = keys.as_mut_ptr();
+        *values_out = values.as_mut_ptr();
+        *len_out = len;
+    }
+
+    // Forget the vectors so they aren't dropped automatically
+    std::mem::forget(keys);
+    std::mem::forget(values);
+}
+
+#[no_mangle]
+extern "C" fn tokenizers_get_vocab_free(keys: *mut *const c_char, values: *mut u32, len: usize) {
+    // Free the keys (C strings) and values arrays
+    if !keys.is_null() {
+        unsafe {
+            let keys_slice = std::slice::from_raw_parts_mut(keys, len);
+            for key_ptr in keys_slice.iter_mut() {
+                if !key_ptr.is_null() {
+                    CString::from_raw(*key_ptr as *mut c_char); // Reclaim the CString
+                }
+            }
+        }
+    }
+
+    // Values (u32 array) will be freed naturally with Rust memory management
+    unsafe {
+        if !values.is_null() {
+            Vec::from_raw_parts(values, len, len); // Reclaim the vector and free it
+        }
     }
 }
 

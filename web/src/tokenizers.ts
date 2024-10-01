@@ -65,6 +65,16 @@ export class Tokenizer {
   }
 
   /**
+   * Returns the vocabulary. Special tokens are considered.
+   *
+   * @returns Vocab size.
+   */
+  getVocab(): number {
+    const res = this.handle.GetVocab();
+    return res;
+  }
+
+  /**
    * Convert the given id to its corresponding token if it exists. If not, return an empty string.
    *
    * @param id the input id.

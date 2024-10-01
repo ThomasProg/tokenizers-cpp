@@ -109,6 +109,11 @@ class RWKVWorldTokenizer : public Tokenizer {
     return size;
   }
 
+  std::map<std::string, int32_t> GetVocab() final
+  {
+    return std::map<std::string, int32_t>();
+  }
+
   virtual std::string IdToToken(int32_t token_id) final {
     RV_CHECK(_idx2word.size() > 0);
     auto it = _idx2word.find(token_id);

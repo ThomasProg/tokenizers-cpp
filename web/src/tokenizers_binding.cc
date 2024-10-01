@@ -23,5 +23,6 @@ EMSCRIPTEN_BINDINGS(tokenizers) {
       .function("Encode", &tokenizers::Tokenizer::Encode)
       .function("Decode", &tokenizers::Tokenizer::Decode)
       .function("GetVocabSize", &tokenizers::Tokenizer::GetVocabSize)
+      .function("GetVocab", &tokenizers::Tokenizer::GetVocab)
       .function("IdToToken", &tokenizers::Tokenizer::IdToToken);
 }
